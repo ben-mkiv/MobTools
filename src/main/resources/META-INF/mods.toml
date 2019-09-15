@@ -1,0 +1,15 @@
+modLoader="javafml" #mandatory
+loaderVersion="[24,)" #mandatory (24 is current forge version)
+issueTrackerURL="http://github.com/ben_mkiv/BetterDispenser/issues" #optional
+displayURL="https://minecraft.curseforge.com/projects/betterdispenser" #optional
+#logoFile="betterdispenser.png" #optional
+credits="ben_mkiv (code), luni (for the inspiration to create this mod)" #optional
+authors="ben_mkiv" #optional
+[[mods]] #mandatory
+modId="betterdispenser" #mandatory
+version="${file.jarVersion}" #mandatory
+displayName="BetterDispenser" #mandatory
+#updateJSONURL="" #optional
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+allows dispensers to feed animals around them when powered with redstone and supplied with food'''
