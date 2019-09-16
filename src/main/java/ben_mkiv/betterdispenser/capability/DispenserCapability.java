@@ -178,9 +178,15 @@ public class DispenserCapability implements IDispenserCapability {
             if(parents.size() >= 2) {
                 nextFeeding = System.currentTimeMillis() + ((timeout/20) * 500);
 
-                for(AnimalEntity parent : parents)
-                    if(!feedEntity(parent))
+                for(AnimalEntity parent : parents) {
+                    if(parent == null || !parent.isAlive()) {
+                        parents.remove(parent);
                         return false;
+                    }
+
+                    if (!feedEntity(parent))
+                        return false;
+                }
 
                 parents.clear();
 
