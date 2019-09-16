@@ -33,7 +33,7 @@ public class Config {
             breedingTimeout = builder
                     .comment("breeding timeout in ticks (20 ticks approx. 1 second)")
                     .translation("config.breedingtimeout")
-                    .define("breedingTimeout", 600);
+                    .define("breedingTimeout", 300);
 
             builder.pop();
         }

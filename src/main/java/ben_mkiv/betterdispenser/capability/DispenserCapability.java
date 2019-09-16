@@ -26,7 +26,7 @@ public class DispenserCapability implements IDispenserCapability {
     static int timeout = 200;
 
     private int radius = 3;
-    private boolean active = true;
+    private boolean active = false;
 
     HashMap<Class, EntityCouple> breeding = new HashMap<>();
 
@@ -45,8 +45,10 @@ public class DispenserCapability implements IDispenserCapability {
     }
 
     private void updateEventHandler(){
-        if(active)
+        if(active) {
+            MinecraftForge.EVENT_BUS.unregister(this);
             MinecraftForge.EVENT_BUS.register(this);
+        }
         else
             MinecraftForge.EVENT_BUS.unregister(this);
     }
@@ -77,6 +79,9 @@ public class DispenserCapability implements IDispenserCapability {
         if(dispenser.getWorld().isRemote())
             MinecraftForge.EVENT_BUS.unregister(this);
 
+        if(!dispenser.getWorld().isAreaLoaded(dispenser.getPos(), 1))
+            return;
+
         //if(dispenser.getBlockState().getWeakPower(dispenser.getWorld(), dispenser.getPos(), Direction.DOWN) == 0)
         //    return;
 
@@ -90,13 +95,19 @@ public class DispenserCapability implements IDispenserCapability {
             return;
 
         for(AnimalEntity entity : entityList){
-            if(entity.isInLove() || entity.isChild() || !entity.canBreed())
+            if(entity.isChild() || !entity.canBreed() || entity.getGrowingAge() != 0)
                 continue;
 
             if(dispenser.getWorld().getEntitiesWithinAABB(entity.getClass(), area).size() > mobCap)
                 continue;
 
-            if(feedEntity(entity))
+            if(!breeding.containsKey(entity.getClass()))
+                breeding.put(entity.getClass(), new EntityCouple());
+
+            if(!breeding.get(entity.getClass()).canWork())
+                continue;
+
+            if(breeding.get(entity.getClass()).increase(entity))
                 return;
         }
     }
@@ -128,19 +139,15 @@ public class DispenserCapability implements IDispenserCapability {
         updateEventHandler();
     }
 
+
     private boolean feedEntity(AnimalEntity entity){
         for(ItemStack stack : inventoryItems) {
             if (entity.isBreedingItem(stack)) {
-
-                if(!breeding.containsKey(entity.getClass()))
-                    breeding.put(entity.getClass(), new EntityCouple(entity.getClass()));
-
-                if(breeding.get(entity.getClass()).lastBreed > System.currentTimeMillis() - ((timeout/20) * 1000))
-                    return false;
-
                 EntityInventoryUtils.consumeItemFromInventory(dispenser, stack.getItem(), 1);
                 entity.setInLove(null);
-                breeding.get(entity.getClass()).increase();
+
+                System.out.println("fed " + entity.getClass().getSimpleName() + ", " + entity.getUniqueID());
+
                 return true;
             }
         }
@@ -157,53 +164,37 @@ public class DispenserCapability implements IDispenserCapability {
         return items;
     }
 
-
     class EntityCouple {
-        long lastBreed = 0;
-        private Class clazz;
-        private int count = 0;
+        long nextFeeding = System.currentTimeMillis();
+        private HashSet<AnimalEntity> parents = new HashSet<>();
 
-        public EntityCouple(Class entityClass){
-            this.clazz = entityClass;
-        }
 
-        public void increase(){
-            count++;
+        public boolean increase(AnimalEntity entity){
+            if(parents.contains(entity))
+                return false;
 
-            if(count == 2) {
-                lastBreed = System.currentTimeMillis();
-                count = 0;
+            parents.add(entity);
+
+            if(parents.size() >= 2) {
+                nextFeeding = System.currentTimeMillis() + ((timeout/20) * 500);
+
+                for(AnimalEntity parent : parents)
+                    if(!feedEntity(parent))
+                        return false;
+
+                parents.clear();
+
+                return true;
+            }
+            else {
+                nextFeeding = System.currentTimeMillis() + 5000;
+                return false;
             }
         }
 
-        public int getCount(){
-            return count;
+        public boolean canWork(){
+            return nextFeeding <= System.currentTimeMillis();
         }
-    }
-
-    private void foobar(int radius){
-        /*
-        updateSigns = radius;
-
-
-        AxisAlignedBB area = new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(radius).offset(entity.getPosition());
-
-        for(BlockPos pos : WorldUtils.getBlockPos(area)){
-            if(!entity.getEntityWorld().isAreaLoaded(pos, 1))
-                continue;
-
-            BlockState state = entity.getEntityWorld().getBlockState(pos);
-            Block block = state.getBlock();
-            if(block instanceof AbstractSignBlock)
-                commands.parseSign(entity.getEntityWorld(), pos);
-        }
-
-
-        MinecartUtils.sendNotify(entity, 4, new StringTextComponent("MinecartTweaks: " + commands.commands.size() + " commands."));
-
-        updateSigns = 0;
-
-        */
     }
 
     public CompoundNBT writeToNBT(){
@@ -218,6 +209,8 @@ public class DispenserCapability implements IDispenserCapability {
             active = nbt.getBoolean("active");
         if(nbt.contains("radius"))
             radius = nbt.getInt("radius");
+
+        updateEventHandler();
     }
 
 }
