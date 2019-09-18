@@ -3,11 +3,9 @@ package ben_mkiv.betterdispenser;
 import ben_mkiv.betterdispenser.capability.DispenserCapability;
 import ben_mkiv.betterdispenser.capability.IDispenserCapability;
 import ben_mkiv.betterdispenser.capability.capability;
-import net.minecraft.item.Items;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,22 +25,32 @@ public class BetterDispenser {
     public static final String MOD_NAME = "BetterDispenser";
     public static final String VERSION = "1.1";
 
+    public static boolean verbose = false;
+
 
     public BetterDispenser(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.spec);
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(
-                (FMLCommonSetupEvent event) -> preInit()
+                (FMLCommonSetupEvent event) -> BetterDispenser.registerCapability()
         );
 
         modEventBus.addListener(
                 (FMLLoadCompleteEvent event) -> DispenserCapability.initConfig()
         );
+
+        modEventBus.addListener(
+                (FMLLoadCompleteEvent event) -> BetterDispenser.initConfig()
+        );
     }
 
-    private void preInit(){
+    private static void registerCapability(){
         CapabilityManager.INSTANCE.register(IDispenserCapability.class, new capability.Storage(), new capability.Factory());
+    }
+
+    private static void initConfig(){
+        verbose = Config.GENERAL.verboseDebug.get();
     }
 
     @SubscribeEvent
@@ -52,26 +60,24 @@ public class BetterDispenser {
 
         DispenserTileEntity dispenser = (DispenserTileEntity) event.getObject();
 
-        if(dispenser.getCapability(capability.CAPABILITY, null).equals(LazyOptional.empty())) {
+        if(!dispenser.getCapability(capability.CAPABILITY).isPresent()) {
             event.addCapability(capability.DISPENSER_CAPABILITY, new capability(dispenser));
         }
     }
 
 
     @SubscribeEvent
-    public static void onInteract(PlayerInteractEvent event) {
+    public static void onInteract(PlayerInteractEvent.RightClickBlock event) {
         if(event.getWorld().isRemote)
             return;
 
-        if(!event.getItemStack().getItem().equals(Items.BLAZE_ROD))
+        if(!DispenserCapability.getInteractionItems().contains(event.getItemStack().getItem()))
             return;
 
         TileEntity tile = event.getWorld().getTileEntity(event.getPos());
 
         if(tile instanceof DispenserTileEntity){
-            LazyOptional<IDispenserCapability> cap = tile.getCapability(capability.CAPABILITY, null);
-            cap.ifPresent(foo -> foo.playerInteract(event.getPlayer()));
-            event.setCanceled(true);
+            tile.getCapability(capability.CAPABILITY).ifPresent(foo -> foo.playerInteract(event));
         }
     }
 

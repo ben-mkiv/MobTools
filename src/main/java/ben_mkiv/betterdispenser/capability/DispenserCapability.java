@@ -1,36 +1,52 @@
 package ben_mkiv.betterdispenser.capability;
 
+import ben_mkiv.betterdispenser.BetterDispenser;
 import ben_mkiv.betterdispenser.Config;
 import ben_mkiv.betterdispenser.utils.EntityInventoryUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class DispenserCapability implements IDispenserCapability {
-    private DispenserTileEntity dispenser = null;
-
     static int mobCap = 25;
     static int totalMobCap = 50;
     static int maxRadius = 10;
     static int timeout = 200;
 
+    static List<Item> interactionItems = new ArrayList<>();
+    static HashMap<UUID, UserInputEventListener> chatListeners = new HashMap<>();
+
+    static {
+        interactionItems.add(Items.BLAZE_ROD);
+        interactionItems.add(Items.NETHER_STAR);
+    }
+
+
+    private DispenserTileEntity dispenser = null;
+
     private int radius = 3;
     private boolean active = false;
 
-    HashMap<Class, EntityCouple> breeding = new HashMap<>();
+    private HashMap<Class, EntityCouple> breeding = new HashMap<>();
 
-    HashSet<ItemStack> inventoryItems = new HashSet<>();
+    private HashSet<ItemStack> inventoryItems = new HashSet<>();
+
+    private HashSet<Class> entityFilter = new HashSet<>();
+
 
     DispenserCapability(DispenserTileEntity dispenserTileEntity){
         dispenser = dispenserTileEntity;
@@ -87,18 +103,20 @@ public class DispenserCapability implements IDispenserCapability {
 
         inventoryItems = getInventoryItems();
 
-        AxisAlignedBB area = new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(radius).offset(dispenser.getPos());
 
-        List<AnimalEntity> entityList = dispenser.getWorld().getEntitiesWithinAABB(AnimalEntity.class, area);
+        List<AnimalEntity> entityList = getAnimalsWithinRange();
 
         if(entityList.size() > totalMobCap)
             return;
 
         for(AnimalEntity entity : entityList){
+            if(entityFilter.size() > 0 && !entityFilter.contains(entity.getClass()))
+                continue;
+
             if(entity.isChild() || !entity.canBreed() || entity.getGrowingAge() != 0)
                 continue;
 
-            if(dispenser.getWorld().getEntitiesWithinAABB(entity.getClass(), area).size() > mobCap)
+            if(getEntitiesWithinRange(entity.getClass()).size() > mobCap)
                 continue;
 
             if(!breeding.containsKey(entity.getClass()))
@@ -112,12 +130,117 @@ public class DispenserCapability implements IDispenserCapability {
         }
     }
 
-    public void playerInteract(PlayerEntity player){
-        if(player.isSneaking())
-            changeRadius(player);
-        else
-            toggleMode(player);
+    private List<AnimalEntity> getAnimalsWithinRange(){
+        return getEntitiesWithinRange(AnimalEntity.class);
     }
+
+    private <T extends Entity> List<T> getEntitiesWithinRange(Class<? extends T> clazz){
+        AxisAlignedBB area = new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(radius).offset(dispenser.getPos());
+        return dispenser.getWorld().getEntitiesWithinAABB(clazz, area);
+    }
+
+    public static List<Item> getInteractionItems(){
+        return interactionItems;
+    }
+
+    public void playerInteract(PlayerInteractEvent event){
+
+        if(event.getItemStack().getItem().equals(Items.BLAZE_ROD)){
+            if (event.getPlayer().isSneaking())
+                changeRadius(event.getPlayer());
+            else
+                toggleMode(event.getPlayer());
+
+            event.setCanceled(true);
+        }
+        else if(event.getItemStack().getItem().equals(Items.NETHER_STAR)){
+            if (event.getPlayer().isSneaking()) {
+                entityFilter.clear();
+                event.getPlayer().sendStatusMessage(new StringTextComponent("filter disabled"), true);
+            }
+            else
+                setupFilter(event.getPlayer());
+
+            event.setCanceled(true);
+        }
+    }
+
+    private void setupFilter(PlayerEntity player){
+        HashMap<Integer, Class> entityClassList = new HashMap<>();
+
+        player.sendStatusMessage(new StringTextComponent("\n§e~~~ dispenser filter setup ~~~"), false);
+
+        if(entityFilter.size() > 0) {
+            String existingFilter = "";
+
+            for(Class clazz : entityFilter)
+                existingFilter+= ", " + clazz.getSimpleName().replace("Entity", "");
+
+            player.sendStatusMessage(new StringTextComponent("§dalready filtering: §f" + existingFilter.substring(2)), false);
+        }
+        else
+            player.sendStatusMessage(new StringTextComponent("§dalready filtering: §fnone"), false);
+
+        int i=1;
+        for(AnimalEntity entity : getAnimalsWithinRange())
+            if(!entityFilter.contains(entity.getClass()) && !entityClassList.containsValue(entity.getClass()))
+                entityClassList.put(i++, entity.getClass());
+
+        if(entityClassList.size() > 0) {
+            player.sendStatusMessage(new StringTextComponent("§aenter number in chat to add Animal to filter or type cancel to abort filter setup"), false);
+            for(Map.Entry<Integer, Class> entry : entityClassList.entrySet()) {
+                player.sendStatusMessage(new StringTextComponent("[" + entry.getKey() + "] " + entry.getValue().getSimpleName().replace("Entity", "")), false);
+            }
+            new UserInputEventListener(player.getUniqueID(), entityClassList);
+        }
+        else
+            player.sendStatusMessage(new StringTextComponent("§2no animal found which could be added to filter"), false);
+    }
+
+    class UserInputEventListener{
+        UUID playerUUID;
+        HashMap<Integer, Class> entityClassList = new HashMap<>();
+
+        UserInputEventListener(UUID uuid, HashMap<Integer, Class> list){
+            if(chatListeners.containsKey(uuid)){
+                //unregister old listeners for the same player
+                MinecraftForge.EVENT_BUS.unregister(chatListeners.get(uuid));
+                chatListeners.remove(uuid);
+            }
+
+            playerUUID = uuid;
+            entityClassList.putAll(list);
+            MinecraftForge.EVENT_BUS.register(this);
+            chatListeners.put(playerUUID, this);
+        }
+
+        @SubscribeEvent
+        public void onServerChatEvent(ServerChatEvent event) {
+            if(!event.getPlayer().getUniqueID().equals(playerUUID))
+                return;
+
+            if(event.getMessage().toLowerCase().contains("cancel")){
+                event.getPlayer().sendStatusMessage(new StringTextComponent("§6filter setup aborted"), false);
+            }
+            else {
+                try {
+                    int id = Integer.valueOf(event.getMessage());
+                    if(!entityClassList.containsKey(id)) throw new Exception(){};
+                    Class clazz = entityClassList.get(id);
+                    entityFilter.add(clazz);
+                    event.getPlayer().sendStatusMessage(new StringTextComponent("§aadded §l" + clazz.getSimpleName().replace("Entity", "") + "§r§a to filter"), false);
+                }
+                catch(Exception ex) {
+                    event.getPlayer().sendStatusMessage(new StringTextComponent("§cinvalid input, filter setup aborted"), false);
+                }
+            }
+
+            event.setCanceled(true);
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
+
+    }
+
 
     public void changeRadius(PlayerEntity player){
         radius++;
@@ -146,7 +269,8 @@ public class DispenserCapability implements IDispenserCapability {
                 EntityInventoryUtils.consumeItemFromInventory(dispenser, stack.getItem(), 1);
                 entity.setInLove(null);
 
-                System.out.println("fed " + entity.getClass().getSimpleName() + ", " + entity.getUniqueID());
+                if(BetterDispenser.verbose)
+                    System.out.println("fed " + entity.getClass().getSimpleName() + ", " + entity.getUniqueID());
 
                 return true;
             }
@@ -207,6 +331,11 @@ public class DispenserCapability implements IDispenserCapability {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active", active);
         nbt.putInt("radius", radius);
+
+        int i=0;
+        for(Class clazz : entityFilter)
+            nbt.putString("filter"+i++, clazz.getName());
+
         return nbt;
     }
 
@@ -215,6 +344,22 @@ public class DispenserCapability implements IDispenserCapability {
             active = nbt.getBoolean("active");
         if(nbt.contains("radius"))
             radius = nbt.getInt("radius");
+
+        int i=0;
+        entityFilter.clear();
+        while(nbt.contains("filter"+i)){
+            String className = nbt.getString("filter"+i);
+            try{
+                Class clazz = Class.forName(className);
+                entityFilter.add(clazz);
+            }
+            catch (Exception ex){
+                System.out.println("skipping invalid class name for filter '"+className+"'");
+            }
+
+            i++;
+        }
+
 
         updateEventHandler();
     }

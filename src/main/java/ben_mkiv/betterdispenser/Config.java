@@ -13,6 +13,9 @@ public class Config {
         public final ForgeConfigSpec.ConfigValue<Integer> maxRadius;
         public final ForgeConfigSpec.ConfigValue<Integer> breedingTimeout;
 
+        public final ForgeConfigSpec.ConfigValue<Boolean> verboseDebug;
+
+
         public General(ForgeConfigSpec.Builder builder) {
             builder.push("General");
             mobCap = builder
@@ -34,6 +37,11 @@ public class Config {
                     .comment("breeding timeout in ticks (20 ticks approx. 1 second)")
                     .translation("config.breedingtimeout")
                     .define("breedingTimeout", 300);
+
+            verboseDebug = builder
+                    .comment("output debug messages to logfile")
+                    .translation("config.verbosedebug")
+                    .define("verboseDebug", false);
 
             builder.pop();
         }
