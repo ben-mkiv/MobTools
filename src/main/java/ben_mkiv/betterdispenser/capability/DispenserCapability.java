@@ -146,7 +146,7 @@ public class DispenserCapability implements IDispenserCapability {
     public void playerInteract(PlayerInteractEvent event){
 
         if(event.getItemStack().getItem().equals(Items.BLAZE_ROD)){
-            if (event.getPlayer().isSneaking())
+            if (event.getPlayer().isCrouching())
                 changeRadius(event.getPlayer());
             else
                 toggleMode(event.getPlayer());
@@ -154,7 +154,7 @@ public class DispenserCapability implements IDispenserCapability {
             event.setCanceled(true);
         }
         else if(event.getItemStack().getItem().equals(Items.NETHER_STAR)){
-            if (event.getPlayer().isSneaking()) {
+            if (event.getPlayer().isCrouching()) {
                 entityFilter.clear();
                 event.getPlayer().sendStatusMessage(new StringTextComponent("filter disabled"), true);
             }
