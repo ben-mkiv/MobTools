@@ -89,7 +89,7 @@ public class DispenserCapability implements IDispenserCapability {
             return;
         }
 
-        if(!dispenser.getWorld().getDimension().getType().equals(event.world.getDimension().getType()))
+        if(dispenser.getWorld() != event.world)
             return;
 
         if(dispenser.getWorld().isRemote())
