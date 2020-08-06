@@ -1,14 +1,13 @@
-package ben_mkiv.mobtools.inventory;
+package ben_mkiv.mobtools.client.gui;
 
 import ben_mkiv.mobtools.MobTools;
+import ben_mkiv.mobtools.inventory.container.CustomContainer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-
-import java.awt.*;
 
 public class CustomContainerScreen<T extends CustomContainer> extends ContainerScreen<T> {
     public CustomContainerScreen(T containerBasic, PlayerInventory playerInventory, ITextComponent title, int width, int height) {
@@ -22,7 +21,9 @@ public class CustomContainerScreen<T extends CustomContainer> extends ContainerS
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
-        //this.renderTooltip(matrixStack, mouseX, mouseY);
+
+        if(getSlotUnderMouse() != null && !getSlotUnderMouse().getStack().isEmpty())
+            this.renderTooltip(matrixStack, getSlotUnderMouse().getStack(), mouseX, mouseY);
     }
 
     /**
@@ -33,6 +34,7 @@ public class CustomContainerScreen<T extends CustomContainer> extends ContainerS
         //final float LABEL_XPOS = 5;
         //final float FONT_Y_SPACING = 12;
         //font.drawString(matrixStack, this.title.getUnformattedComponentText(), LABEL_XPOS, 100, Color.darkGray.getRGB());
+        //super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
     }
 
     /**
@@ -50,6 +52,7 @@ public class CustomContainerScreen<T extends CustomContainer> extends ContainerS
         int edgeSpacingX = (this.width - this.xSize) / 2;
         int edgeSpacingY = (this.height - this.ySize) / 2;
         this.blit(matrixStack, edgeSpacingX, edgeSpacingY, 0, 0, this.xSize, this.ySize);
+
     }
 
     // This is the resource location for the background image for the GUI

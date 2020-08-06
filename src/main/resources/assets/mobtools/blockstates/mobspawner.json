@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "mobtools:block/mobspawner" }
+  }
+}

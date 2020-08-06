@@ -1,4 +1,4 @@
-package ben_mkiv.betterdispenser;
+package ben_mkiv.mobtools;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

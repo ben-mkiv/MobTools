@@ -1,5 +1,6 @@
-package ben_mkiv.mobtools.inventory;
+package ben_mkiv.mobtools.inventory.container;
 
+import ben_mkiv.mobtools.inventory.MobCollectorItemInventory;
 import ben_mkiv.mobtools.items.MobCollector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;

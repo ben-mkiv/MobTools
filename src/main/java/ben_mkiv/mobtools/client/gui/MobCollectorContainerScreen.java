@@ -1,5 +1,6 @@
-package ben_mkiv.mobtools.inventory;
+package ben_mkiv.mobtools.client.gui;
 
+import ben_mkiv.mobtools.inventory.container.MobCollectorContainer;
 import ben_mkiv.mobtools.items.MobCartridge;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;

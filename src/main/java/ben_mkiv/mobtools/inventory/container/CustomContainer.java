@@ -1,4 +1,4 @@
-package ben_mkiv.mobtools.inventory;
+package ben_mkiv.mobtools.inventory.container;
 
 
 import net.minecraft.entity.player.PlayerEntity;

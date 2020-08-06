@@ -1,4 +1,5 @@
 package ben_mkiv.mobtools.interfaces;
 
-public class IContentListener {
+public interface IContentListener {
+    void onContentChanged(boolean forceBlockUpdate);
 }
