@@ -20,7 +20,6 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -39,7 +38,7 @@ public class MobTools {
 
     public static final String MOD_ID = "mobtools";
     public static final String MOD_NAME = "MobTools";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "0.1";
 
     public static boolean verbose = false;
     public static boolean useEnergy = true;
@@ -47,6 +46,7 @@ public class MobTools {
     public static boolean allowBossSpawn = false;
     public static int energyBaseCost = 10;
     public static int entityCountLimit = 30;
+    public static int spawnerMaxRadius = 5;
 
     public static final ItemGroup CREATIVE_TAB = new ItemGroup(MOD_ID+".creativeTab") {
         @Override
@@ -110,22 +110,21 @@ public class MobTools {
                 }
             });
         }
-
-        @SubscribeEvent
-        @OnlyIn(Dist.CLIENT)
-        public static void onModelRegistryEvent(ModelRegistryEvent event) {
-            //MobSpawnerItem.DEFAULT.Properties(new EnergyTurretRenderHelper());
-
-
-
-        }
-
     }
 
     private static void initConfig(){
         verbose = Config.GENERAL.verboseDebug.get();
-    }
 
+        allowBossCapture = Config.GENERAL.allowBossCapture.get();
+        allowBossSpawn = Config.GENERAL.allowBossSpawn.get();
+
+        energyBaseCost = Config.GENERAL.energyBaseCost.get();
+        useEnergy = Config.GENERAL.useEnergy.get();
+
+        spawnerMaxRadius = Config.GENERAL.spawnerMaxRadius.get();
+
+        entityCountLimit = Config.GENERAL.totalMobCap.get();
+    }
 
     @OnlyIn(Dist.CLIENT)
     private static void registerBlockModel(final Block block, final String blockName) {

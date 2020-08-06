@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "iii",
+    "iCi",
+    "iii"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:chest"
+    },
+    "i": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "result": {
+    "item": "mobtools:mobcartridge"
+  }
+}

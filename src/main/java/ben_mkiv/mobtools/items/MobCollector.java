@@ -3,6 +3,7 @@ package ben_mkiv.mobtools.items;
 import ben_mkiv.mobtools.MobTools;
 import ben_mkiv.mobtools.inventory.container.MobCollectorContainer;
 import ben_mkiv.mobtools.inventory.MobCollectorItemInventory;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -33,6 +34,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -46,6 +48,15 @@ public class MobCollector extends Item implements INamedContainerProvider {
     public MobCollector(){
         super(new Properties().maxStackSize(1).group(MobTools.CREATIVE_TAB));
         setRegistryName(MobTools.MOD_ID, "mobcollector");
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+
+        tooltip.add(new StringTextComponent("sneak + right-click to change mobcartridge"));
+        tooltip.add(new StringTextComponent("right-click to capture mob"));
+        tooltip.add(new StringTextComponent("left-click to release last captured mob"));
     }
 
 

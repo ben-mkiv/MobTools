@@ -1,0 +1,9 @@
+{
+  "parent": "mobtools:block/mobspawner",
+  "textures": {
+    "0": "mobtools:blocks/mobspawner/mobspawner_middle_orange",
+    "1": "mobtools:blocks/mobspawner/mobspawner_side",
+    "2": "mobtools:blocks/mobspawner/mobspawner_top",
+    "particle": "mobtools:blocks/mobspawner/mobspawner_top"
+  }
+}

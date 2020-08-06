@@ -8,40 +8,47 @@ public class Config {
     public static final ForgeConfigSpec spec = BUILDER.build();
 
     public static class General {
-        public final ForgeConfigSpec.ConfigValue<Integer> mobCap;
-        public final ForgeConfigSpec.ConfigValue<Integer> totalMobCap;
-        public final ForgeConfigSpec.ConfigValue<Integer> maxRadius;
-        public final ForgeConfigSpec.ConfigValue<Integer> breedingTimeout;
+        public final ForgeConfigSpec.ConfigValue<Integer> totalMobCap, spawnerMaxRadius, energyBaseCost;
 
-        public final ForgeConfigSpec.ConfigValue<Boolean> verboseDebug;
+        public final ForgeConfigSpec.ConfigValue<Boolean> verboseDebug, useEnergy, allowBossCapture, allowBossSpawn;
 
 
         public General(ForgeConfigSpec.Builder builder) {
             builder.push("General");
-            mobCap = builder
-                    .comment("maximum amount of mobs of the same type")
-                    .translation("config.mobcap")
-                    .define("mobCap", 25);
-
             totalMobCap = builder
                     .comment("maximum amount of all mobs")
                     .translation("config.totalmobcap")
                     .define("totalMobCap", 50);
 
-            maxRadius = builder
-                    .comment("maximum breeding radius")
-                    .translation("config.radiuslimit")
-                    .define("radiusLimit", 10);
+            spawnerMaxRadius = builder
+                    .comment("maximum allowed radius for the spawner")
+                    .translation("config.spawnermaxradius")
+                    .define("spawnerMaxRadius", 5);
 
-            breedingTimeout = builder
-                    .comment("breeding timeout in ticks (20 ticks approx. 1 second)")
-                    .translation("config.breedingtimeout")
-                    .define("breedingTimeout", 300);
+            energyBaseCost = builder
+                    .comment("energy base cost, final cost is baseCost * mobHealth")
+                    .translation("config.energybasecost")
+                    .define("energyBaseCost", 10);
 
             verboseDebug = builder
                     .comment("output debug messages to logfile")
                     .translation("config.verbosedebug")
                     .define("verboseDebug", false);
+
+            useEnergy = builder
+                    .comment("spawner requires forge energy")
+                    .translation("config.useenergy")
+                    .define("useEnergy", true);
+
+            allowBossCapture = builder
+                    .comment("allow boss mobs to be captured")
+                    .translation("config.allowbosscapture")
+                    .define("allowBossCapture", false);
+
+            allowBossSpawn = builder
+                    .comment("allow boss mobs to be spawned")
+                    .translation("config.allowbossspawn")
+                    .define("allowBossSpawn", false);
 
             builder.pop();
         }

@@ -1,16 +1,18 @@
 package ben_mkiv.mobtools.items;
 
 import ben_mkiv.mobtools.MobTools;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MobCartridge extends Item {
     public static MobCartridge DEFAULT;
@@ -18,6 +20,14 @@ public class MobCartridge extends Item {
     public MobCartridge(){
         super(new Properties().maxStackSize(1).group(MobTools.CREATIVE_TAB));
         setRegistryName(MobTools.MOD_ID, "mobcartridge");
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+
+        tooltip.add(new StringTextComponent("used as mob container in the mobcollector tool"));
+        tooltip.add(new StringTextComponent("can hold up to 9 mobs"));
     }
 
     public static CompoundNBT getNBT(ItemStack cartridge){

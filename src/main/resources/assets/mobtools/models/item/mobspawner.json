@@ -1,3 +1,9 @@
 {
-  "parent": "mobtools:block/mobspawner"
+  "parent": "mobtools:block/mobspawner",
+  "overrides": [
+    { "predicate": { "mobtools:location": 0 }, "model": "mobtools:block/mobspawner" },
+    { "predicate": { "mobtools:location": 1 }, "model": "mobtools:block/mobspawner_red" },
+    { "predicate": { "mobtools:location": 2 }, "model": "mobtools:block/mobspawner_orange" },
+    { "predicate": { "mobtools:location": 3 }, "model": "mobtools:block/mobspawner_green" }
+  ]
 }
