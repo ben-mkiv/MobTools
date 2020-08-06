@@ -1,7 +1,7 @@
 package ben_mkiv.betterdispenser;
 
-import ben_mkiv.betterdispenser.capability.DispenserCapability;
-import ben_mkiv.betterdispenser.capability.IDispenserCapability;
+import ben_mkiv.betterdispenser.capability.SpawnCapability;
+import ben_mkiv.betterdispenser.capability.ISpawnCapability;
 import ben_mkiv.betterdispenser.capability.capability;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -17,36 +17,36 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod.EventBusSubscriber(modid = BetterDispenser.MOD_ID)
-@Mod(value = BetterDispenser.MOD_ID)
-public class BetterDispenser {
+@Mod.EventBusSubscriber(modid = MobTools.MOD_ID)
+@Mod(value = MobTools.MOD_ID)
+public class MobTools {
 
     public static final String MOD_ID = "betterdispenser";
-    public static final String MOD_NAME = "BetterDispenser";
+    public static final String MOD_NAME = "MobTools";
     public static final String VERSION = "1.1";
 
     public static boolean verbose = false;
 
 
-    public BetterDispenser(){
+    public MobTools(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.spec);
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(
-                (FMLCommonSetupEvent event) -> BetterDispenser.registerCapability()
+                (FMLCommonSetupEvent event) -> MobTools.registerCapability()
         );
 
         modEventBus.addListener(
-                (FMLLoadCompleteEvent event) -> DispenserCapability.initConfig()
+                (FMLLoadCompleteEvent event) -> SpawnCapability.initConfig()
         );
 
         modEventBus.addListener(
-                (FMLLoadCompleteEvent event) -> BetterDispenser.initConfig()
+                (FMLLoadCompleteEvent event) -> MobTools.initConfig()
         );
     }
 
     private static void registerCapability(){
-        CapabilityManager.INSTANCE.register(IDispenserCapability.class, new capability.Storage(), new capability.Factory());
+        CapabilityManager.INSTANCE.register(ISpawnCapability.class, new capability.Storage(), new capability.Factory());
     }
 
     private static void initConfig(){
@@ -71,7 +71,7 @@ public class BetterDispenser {
         if(event.getWorld().isRemote)
             return;
 
-        if(!DispenserCapability.getInteractionItems().contains(event.getItemStack().getItem()))
+        if(!SpawnCapability.getInteractionItems().contains(event.getItemStack().getItem()))
             return;
 
         TileEntity tile = event.getWorld().getTileEntity(event.getPos());
