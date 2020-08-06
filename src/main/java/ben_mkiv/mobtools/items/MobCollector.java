@@ -54,9 +54,9 @@ public class MobCollector extends Item implements INamedContainerProvider {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
-        tooltip.add(new StringTextComponent("sneak + right-click to change mobcartridge"));
-        tooltip.add(new StringTextComponent("right-click to capture mob"));
-        tooltip.add(new StringTextComponent("left-click to release last captured mob"));
+        tooltip.add(new StringTextComponent("§5sneak + right-click §7to change mobcartridge"));
+        tooltip.add(new StringTextComponent("§5right-click §7to capture mob"));
+        tooltip.add(new StringTextComponent("§5left-click §7to release last captured mob"));
     }
 
 
@@ -86,7 +86,7 @@ public class MobCollector extends Item implements INamedContainerProvider {
                 if(!player.getEntityWorld().isRemote()) {
                     if(!MobTools.allowBossCapture && !result.isNonBoss())
                         player.sendStatusMessage(new StringTextComponent(result.getDisplayName().getUnformattedComponentText() + " is a boss mob and can't be stored"), true);
-                    else if(result instanceof TameableEntity && !((TameableEntity) result).isOwner(player))
+                    else if(result instanceof TameableEntity && ((TameableEntity) result).getOwnerId() != null && !((TameableEntity) result).isOwner(player))
                         player.sendStatusMessage(new StringTextComponent(result.getDisplayName().getUnformattedComponentText() + " is owned by another player and can't be stored"), true);
                     else if(storeMob(player, player.getHeldItem(hand), result))
                         player.sendStatusMessage(new StringTextComponent(result.getDisplayName().getUnformattedComponentText() + " stored"), true);

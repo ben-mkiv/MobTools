@@ -29,13 +29,13 @@ public class MobSpawnerItem extends BlockItem {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
-        tooltip.add(new StringTextComponent("spawns mobs above it"));
-        tooltip.add(new StringTextComponent("requires mob cartridge in it's inventory"));
+        tooltip.add(new StringTextComponent("§7spawns mobs above it"));
+        tooltip.add(new StringTextComponent("§7requires mob cartridge in it's inventory"));
         if(MobTools.useEnergy)
-            tooltip.add(new StringTextComponent("requires "+MobTools.energyBaseCost+"FE * mobHealth to spawn a mob"));
+            tooltip.add(new StringTextComponent("§7requires "+MobTools.energyBaseCost+"FE * mobHealth to spawn a mob"));
 
-        tooltip.add(new StringTextComponent("color indicates good placement position"));
-        tooltip.add(new StringTextComponent("place in chunk center for best (green) result"));
+        tooltip.add(new StringTextComponent("§7color indicates good placement position"));
+        tooltip.add(new StringTextComponent("§7place in chunk center for §2best §7result"));
     }
 
     public static class LocationProperty implements IItemPropertyGetter {
@@ -61,20 +61,26 @@ public class MobSpawnerItem extends BlockItem {
             BlockRayTraceResult result = ((BlockRayTraceResult) Minecraft.getInstance().objectMouseOver);
             BlockPos placePosition = result.getPos().add(result.getFace().getDirectionVec());
 
-            int x = placePosition.getX();
-            int z = placePosition.getZ();
+            int radius = maxChunkRadius(placePosition);
 
-            x = Math.abs(x < 0 ? x+1 : x) % 16;
-            z = Math.abs(z < 0 ? z+1 : z) % 16;
-
-            if(x + MobTools.spawnerMaxRadius > 15 || x - MobTools.spawnerMaxRadius < 0 || z + MobTools.spawnerMaxRadius > 15 || z - MobTools.spawnerMaxRadius < 0)
+            if(radius < MobTools.spawnerMaxRadius)
                 return 1;
 
-            if(x + MobTools.spawnerMaxRadius + 1 > 15 || x - MobTools.spawnerMaxRadius - 1 < 0 || z + MobTools.spawnerMaxRadius + 1 > 15 || z - MobTools.spawnerMaxRadius - 1 < 0)
+            if(radius <= MobTools.spawnerMaxRadius)
                 return 2;
 
             return 3;
         }
+    }
+
+    public static int maxChunkRadius(BlockPos pos){
+        int x = pos.getX();
+        int z = pos.getZ();
+
+        x = Math.abs(x < 0 ? x+1 : x) % 16;
+        z = Math.abs(z < 0 ? z+1 : z) % 16;
+
+        return Math.min(Math.min(15-x, x), Math.min(15-z, z));
     }
 
 }

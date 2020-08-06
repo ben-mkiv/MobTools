@@ -1,5 +1,6 @@
 {
-  "block.mobtools.mobspawner": "mob spawner",
-  "item.mobtools.mobcollector": "mob collector",
-  "item.mobtools.mobcartridge": "mob cartridge"
+  "block.mobtools.mobspawner": "MobSpawner",
+  "item.mobtools.mobcollector": "MobCollector",
+  "item.mobtools.mobcartridge": "MobCartridge",
+  "itemGroup.mobtools.creativeTab": "MobTools"
 }

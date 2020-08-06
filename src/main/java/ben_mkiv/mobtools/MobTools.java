@@ -38,15 +38,17 @@ public class MobTools {
 
     public static final String MOD_ID = "mobtools";
     public static final String MOD_NAME = "MobTools";
-    public static final String VERSION = "0.1";
+    public static final String VERSION = "1.0";
 
     public static boolean verbose = false;
     public static boolean useEnergy = true;
     public static boolean allowBossCapture = false;
     public static boolean allowBossSpawn = false;
     public static int energyBaseCost = 10;
-    public static int entityCountLimit = 30;
+    public static int entityCountLimit = 10;
     public static int spawnerMaxRadius = 5;
+    public static int spawnerMinTickDelay = 50;
+    public static boolean badPlacementPenalty = true;
 
     public static final ItemGroup CREATIVE_TAB = new ItemGroup(MOD_ID+".creativeTab") {
         @Override
@@ -124,11 +126,10 @@ public class MobTools {
         spawnerMaxRadius = Config.GENERAL.spawnerMaxRadius.get();
 
         entityCountLimit = Config.GENERAL.totalMobCap.get();
-    }
 
-    @OnlyIn(Dist.CLIENT)
-    private static void registerBlockModel(final Block block, final String blockName) {
+        spawnerMinTickDelay = Config.GENERAL.spawnerMinTickDelay.get();
 
+        badPlacementPenalty = Config.GENERAL.badPlacementPenalty.get();
     }
 
 }

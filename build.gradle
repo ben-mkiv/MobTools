@@ -30,7 +30,7 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {
-                betteranimalsplus {
+                mobtools {
                     source sourceSets.main
                 }
             }
@@ -41,7 +41,7 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {
-                betteranimalsplus {
+                mobtools {
                     source sourceSets.main
                 }
             }
@@ -49,8 +49,28 @@ minecraft {
     }
 }
 
+repositories {
+    maven {
+        // mekanism
+        url 'https://modmaven.k-4u.nl/'
+    }
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.k-4u.nl"
+    }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}")// core
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:generators")// Mekanism: Generators
+    runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${jei_version}") // JEI at runtime to check recipes
 }
 
 tasks.withType(JavaCompile) {

@@ -2,16 +2,19 @@ package ben_mkiv.mobtools.inventory.container;
 
 import ben_mkiv.mobtools.blocks.MobSpawnerBlock;
 import ben_mkiv.mobtools.energy.CustomEnergyStorage;
+import ben_mkiv.mobtools.inventory.slots.SpecialItemSlot;
+import ben_mkiv.mobtools.items.MobCollector;
 import ben_mkiv.mobtools.tileentity.MobSpawnerTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.Item;
 import net.minecraft.util.IntReferenceHolder;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import java.util.HashSet;
 
 public class MobSpawnerContainer extends CustomContainer {
     public static final int width = 175, height = 195;
@@ -19,6 +22,8 @@ public class MobSpawnerContainer extends CustomContainer {
     public static ContainerType containerType;
 
     public MobSpawnerTileEntity spawner;
+
+    static HashSet<Item> cartridgeSlotItems = new HashSet<>();
 
 
     public IntReferenceHolder energyStored = new IntReferenceHolder() {
@@ -39,10 +44,14 @@ public class MobSpawnerContainer extends CustomContainer {
     public MobSpawnerContainer(PlayerEntity player, PlayerInventory inventoryPlayer, MobSpawnerTileEntity tile){
         super(containerType, MobSpawnerBlock.GUI_ID);
 
+        if(cartridgeSlotItems.isEmpty()){
+            cartridgeSlotItems.add(MobCollector.DEFAULT);
+        }
+
         spawner = tile;
 
         if(spawner != null) {
-            addSlot(new SlotItemHandler(spawner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null), 0, width / 2 - 18 / 2, 34));
+            addSlot(new SpecialItemSlot(spawner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null), 0, width - 27 , 81, cartridgeSlotItems));
 
             trackInt(energyStored);
         }

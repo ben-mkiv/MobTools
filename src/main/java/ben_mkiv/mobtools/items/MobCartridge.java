@@ -11,8 +11,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MobCartridge extends Item {
     public static MobCartridge DEFAULT;
@@ -26,8 +25,12 @@ public class MobCartridge extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
-        tooltip.add(new StringTextComponent("used as mob container in the mobcollector tool"));
-        tooltip.add(new StringTextComponent("can hold up to 9 mobs"));
+        tooltip.add(new StringTextComponent("§7used as mob container in the mobcollector tool"));
+        tooltip.add(new StringTextComponent("§7can hold up to 9 mobs"));
+
+        for(Map.Entry<String, Integer> entry : getStoredEntitiesCount(stack).entrySet()) {
+            tooltip.add(new StringTextComponent("§6" + entry.getValue() + "x §e" + entry.getKey()));
+        }
     }
 
     public static CompoundNBT getNBT(ItemStack cartridge){
@@ -103,6 +106,26 @@ public class MobCartridge extends Item {
             for (int i = 0; i < nbt.getCompound("entities").getInt("index"); i++) {
                 if (nbt.getCompound("entities").contains("entity" + i))
                     list.add(nbt.getCompound("entities").getCompound("entity" + i));
+            }
+        }
+
+        return list;
+    }
+
+    public static HashMap<String, Integer> getStoredEntitiesCount(ItemStack cartridge){
+        HashMap<String, Integer> list = new HashMap<>();
+
+        if(cartridge.getItem() instanceof MobCartridge) {
+            CompoundNBT nbt = getNBT(cartridge);
+
+            for (int i = 0; i < nbt.getCompound("entities").getInt("index"); i++) {
+                if (nbt.getCompound("entities").contains("entity" + i)) {
+                    String id = nbt.getCompound("entities").getCompound("entity" + i).getString("id");
+                    if(!list.containsKey(id))
+                        list.put(id, 0);
+
+                    list.replace(id, list.get(id) + 1);
+                }
             }
         }
 

@@ -6,6 +6,7 @@ import ben_mkiv.mobtools.interfaces.IContentListener;
 import ben_mkiv.mobtools.inventory.MobCollectorInventory;
 import ben_mkiv.mobtools.inventory.container.MobSpawnerContainer;
 import ben_mkiv.mobtools.items.MobCartridge;
+import ben_mkiv.mobtools.items.MobSpawnerItem;
 import ben_mkiv.mobtools.utils.ItemUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -47,11 +48,20 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
 
     private ArrayList<String> mobTypes = new ArrayList<>();
 
-    private int radius = 4;
-    private int tickDelay = 200;
+    public int radius = Math.min(7, MobTools.spawnerMaxRadius);
+    public int tickDelay = Math.max(200, MobTools.spawnerMinTickDelay);
 
     public MobSpawnerTileEntity(){
         super(tileEntityType);
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+
+        if(MobTools.badPlacementPenalty){
+            radius = Math.min(radius, MobSpawnerItem.maxChunkRadius(getPos()));
+        }
     }
 
     @Override
@@ -95,6 +105,9 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
     @Override
     public void tick() {
         if(getWorld().getGameTime() % tickDelay != 0)
+            return;
+
+        if(mobTypes.isEmpty())
             return;
 
         AxisAlignedBB area = new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(radius);
@@ -181,29 +194,6 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
         BlockState state = getWorld().getBlockState(getPos());
         getWorld().notifyBlockUpdate(getPos(), state, state, 3);
     }
-
-    /*
-    @Nullable
-    @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(getPos(), 42, getUpdateTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(getWorld().getBlockState(pkt.getPos()), pkt.getNbtCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-        read(state, tag);
-    }
-
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return write(super.getUpdateTag());
-    }
-    */
 
     @Override
     public @Nonnull
