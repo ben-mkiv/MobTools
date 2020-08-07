@@ -35,7 +35,6 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
             CompoundNBT data = new CompoundNBT();
             data.putInt("setRadius", slider.getValueInt());
             NetworkPacketBase.sendToServer(new MobSpawner_NetworkMessage(container.spawner, data));
-            System.out.println("value changed to " + slider.getValueInt());
         }
     };
 
