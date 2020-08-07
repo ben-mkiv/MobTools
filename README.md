@@ -1,4 +1,5 @@
-# BetterDispenser
+# MobTools
 
 Minecraft Mod
-# MobTools
+
+https://www.curseforge.com/minecraft/mc-mods/mobtools
