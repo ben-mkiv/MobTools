@@ -55,7 +55,6 @@ public class CustomContainerScreen<T extends CustomContainer> extends ContainerS
         int edgeSpacingX = (this.width - this.xSize) / 2;
         int edgeSpacingY = (this.height - this.ySize) / 2;
         this.blit(matrixStack, edgeSpacingX, edgeSpacingY, 0, 0, this.xSize, this.ySize);
-
     }
 
     // This is the resource location for the background image for the GUI

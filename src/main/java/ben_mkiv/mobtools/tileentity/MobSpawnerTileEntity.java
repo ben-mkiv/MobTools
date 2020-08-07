@@ -13,6 +13,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -38,7 +40,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 
-public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider, IContentListener {
+public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider, IContentListener, ITilePacketHandler {
     public static TileEntityType<MobSpawnerTileEntity> tileEntityType;
 
     private MobCollectorInventory inventory = new MobCollectorInventory(1, this);
@@ -60,6 +62,13 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
     }
 
     @Override
+    public void handleNetworkUpdate(CompoundNBT data) {
+        if(data.contains("setRadius"))
+            setRadius(data.getInt("setRadius"));
+
+    }
+
+    @Override
     public CompoundNBT write(CompoundNBT compound) {
         CompoundNBT nbt = new CompoundNBT();
 
@@ -72,6 +81,13 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
         compound.put(MobTools.MOD_ID, nbt);
 
         return super.write(compound);
+    }
+
+    public int getMaxRadius(){
+        if(MobTools.badPlacementPenalty)
+            return Math.min(MobTools.spawnerMaxRadius, MobSpawnerItem.maxChunkRadius(getPos()));
+        else
+            return MobTools.spawnerMaxRadius;
     }
 
     @Override
@@ -97,6 +113,11 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
         super.read(state, compound);
     }
 
+    private void setRadius(int newRadius){
+        radius = Math.min(MobTools.spawnerMaxRadius, newRadius);
+        markDirty();
+    }
+
     @Override
     public void tick() {
         if(getWorld().isRemote())
@@ -105,9 +126,9 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
         if(!readyToWork){
             MobSpawnerBlock.updateRedstoneState(getWorld(), getPos());
             if(MobTools.badPlacementPenalty){
-                radius = Math.min(radius, MobSpawnerItem.maxChunkRadius(getPos()));
+                setRadius(Math.min(radius, MobSpawnerItem.maxChunkRadius(getPos())));;
             }
-
+            reloadInventory();
             readyToWork = true;
         }
 
@@ -138,6 +159,16 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
             if(!(mob instanceof MobEntity))
                 continue;
 
+            if(!((MobEntity) mob).canSpawn(getWorld(), SpawnReason.SPAWN_EGG))
+                continue;
+
+            Vector3d spawnPosition = Vector3d.copy(getPos()).subtract(radius, 0, radius).add(getWorld().rand.nextFloat() * 2 * radius, 1, getWorld().rand.nextFloat() * 2 * radius);
+
+            mob.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
+
+            if(!getWorld().hasNoCollisions(mob))
+                continue;
+
             if(MobTools.useEnergy) {
                 int energyCost = (int) Math.ceil(((MobEntity) mob).getHealth() * MobTools.energyBaseCost);
 
@@ -147,13 +178,10 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
                 energyStorage.extractEnergy(energyCost, false);
             }
 
-            Vector3d spawnPosition = Vector3d.copy(getPos()).add(getWorld().rand.nextFloat() * radius, 1, getWorld().rand.nextFloat() * radius);
 
-            mob.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
 
             getWorld().addEntity(mob);
         }
-
     }
 
     public void setRedstonePowered(boolean isPowered){

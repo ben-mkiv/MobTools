@@ -8,6 +8,7 @@ import ben_mkiv.mobtools.client.gui.MobSpawnerContainerScreen;
 import ben_mkiv.mobtools.items.MobCartridge;
 import ben_mkiv.mobtools.items.MobCollector;
 import ben_mkiv.mobtools.items.MobSpawnerItem;
+import ben_mkiv.mobtools.network.NetworkPacketBase;
 import ben_mkiv.mobtools.tileentity.MobSpawnerTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.ScreenManager;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -63,6 +65,10 @@ public class MobTools {
 
         modEventBus.addListener(
                 (FMLLoadCompleteEvent event) -> MobTools.initConfig()
+        );
+
+        modEventBus.addListener(
+                (FMLCommonSetupEvent event) -> MobTools.initCommon()
         );
     }
 
@@ -112,6 +118,10 @@ public class MobTools {
                 }
             });
         }
+    }
+
+    private static void initCommon(){
+        NetworkPacketBase.init();
     }
 
     private static void initConfig(){

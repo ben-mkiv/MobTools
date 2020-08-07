@@ -3,23 +3,57 @@ package ben_mkiv.mobtools.client.gui;
 import ben_mkiv.mobtools.MobTools;
 import ben_mkiv.mobtools.inventory.container.MobSpawnerContainer;
 import ben_mkiv.mobtools.items.MobCartridge;
+import ben_mkiv.mobtools.network.MobSpawner.MobSpawner_NetworkMessage;
+import ben_mkiv.mobtools.network.NetworkPacketBase;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.client.gui.widget.Slider;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerContainer> {
+    Slider rangeSlider;
+
+    class IgnorantHandler implements Button.IPressable {
+        @Override
+        public void onPress(Button element) {}
+    };
+
+    class SliderHandler implements Slider.ISlider {
+        @Override
+        public void onChangeSliderValue(Slider slider) {
+            CompoundNBT data = new CompoundNBT();
+            data.putInt("setRadius", slider.getValueInt());
+            NetworkPacketBase.sendToServer(new MobSpawner_NetworkMessage(container.spawner, data));
+            System.out.println("value changed to " + slider.getValueInt());
+        }
+    };
+
+    SliderHandler rangeSliderHandler = new SliderHandler();
+
     public MobSpawnerContainerScreen(MobSpawnerContainer containerBasic, PlayerInventory playerInventory, ITextComponent title){
         super(containerBasic, playerInventory, title, MobSpawnerContainer.width, MobSpawnerContainer.height);
+    }
+
+    @Override
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
+        buttons.clear();
+
+        rangeSlider = new Slider(getGuiLeft() + 5, getGuiTop() + 90, 110, 16, new StringTextComponent("radius: "), new StringTextComponent(" blocks"), 0, container.spawner.getMaxRadius(), container.spawner.radius, false, true, new IgnorantHandler(), rangeSliderHandler);
+
+        if(!buttons.contains(rangeSlider))
+            addButton(rangeSlider);
     }
 
     protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
@@ -36,8 +70,6 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
 
             font.drawString(matrixStack, energyInfo, getGuiLeft() + container.width - 15 - font.getStringWidth(energyInfo), getGuiTop() + 8, Color.darkGray.getRGB());
         }
-
-
 
 
 
@@ -64,8 +96,6 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
         else {
             font.drawString(matrixStack, "no cartridge", getGuiLeft() + 10, getGuiTop() + 25, Color.darkGray.getRGB());
         }
-
-        font.drawString(matrixStack, "radius: " + container.spawner.radius + " blocks", getGuiLeft() + 10, getGuiTop() + 95, Color.GRAY.getRGB());
 
     }
 }
