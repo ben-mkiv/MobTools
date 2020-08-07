@@ -57,8 +57,8 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
                     offsetY += 10;
                 }*/
 
-                int workPerc = (int) Math.round((double) (container.spawner.getWorld().getGameTime() % container.spawner.tickDelay) / (double) container.spawner.tickDelay * 100d);
-                GuiWidgets.ProgressBar2D_vertical(getGuiLeft() + 135, getGuiTop() + 76, 4, 26, workPerc, Color.GRAY, Color.GREEN);
+                int workPerc = container.spawner.isRedstonePowered ? 100 : (int) Math.round((double) (container.spawner.getWorld().getGameTime() % container.spawner.tickDelay) / (double) container.spawner.tickDelay * 100d);
+                GuiWidgets.ProgressBar2D_vertical(getGuiLeft() + 135, getGuiTop() + 76, 4, 26, workPerc, Color.GRAY, container.spawner.isRedstonePowered ? Color.RED : Color.GREEN);
             }
         }
         else {

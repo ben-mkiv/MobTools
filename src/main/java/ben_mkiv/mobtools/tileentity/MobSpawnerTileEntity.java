@@ -1,6 +1,7 @@
 package ben_mkiv.mobtools.tileentity;
 
 import ben_mkiv.mobtools.MobTools;
+import ben_mkiv.mobtools.blocks.MobSpawnerBlock;
 import ben_mkiv.mobtools.energy.CustomEnergyStorage;
 import ben_mkiv.mobtools.interfaces.IContentListener;
 import ben_mkiv.mobtools.inventory.MobCollectorInventory;
@@ -50,18 +51,12 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
 
     public int radius = Math.min(7, MobTools.spawnerMaxRadius);
     public int tickDelay = Math.max(200, MobTools.spawnerMinTickDelay);
+    public boolean isRedstonePowered = false;
+
+    public boolean readyToWork = false;
 
     public MobSpawnerTileEntity(){
         super(tileEntityType);
-    }
-
-    @Override
-    public void validate() {
-        super.validate();
-
-        if(MobTools.badPlacementPenalty){
-            radius = Math.min(radius, MobSpawnerItem.maxChunkRadius(getPos()));
-        }
     }
 
     @Override
@@ -104,6 +99,21 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
 
     @Override
     public void tick() {
+        if(getWorld().isRemote())
+            return;
+
+        if(!readyToWork){
+            MobSpawnerBlock.updateRedstoneState(getWorld(), getPos());
+            if(MobTools.badPlacementPenalty){
+                radius = Math.min(radius, MobSpawnerItem.maxChunkRadius(getPos()));
+            }
+
+            readyToWork = true;
+        }
+
+        if(isRedstonePowered)
+            return;
+
         if(getWorld().getGameTime() % tickDelay != 0)
             return;
 
@@ -146,6 +156,10 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
 
     }
 
+    public void setRedstonePowered(boolean isPowered){
+        isRedstonePowered = isPowered;
+    }
+
     public void reloadInventory(){
         mobTypes.clear();
         for(CompoundNBT nbt : MobCartridge.getStoredEntities(inventory.getStackInSlot(0))){
@@ -180,6 +194,9 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
 
     @Override
     public void remove() {
+        if(getWorld().isRemote())
+            return;
+
         ItemUtils.dropInventory(getWorld(), inventory, getPos(), false, 10);
 
         super.remove();

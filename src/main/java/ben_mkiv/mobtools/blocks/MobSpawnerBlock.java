@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -51,6 +52,26 @@ public class MobSpawnerBlock extends Block{
         }
 
         return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
+        return false;
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+        //super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+
+        updateRedstoneState(worldIn, pos);
+    }
+
+    public static void updateRedstoneState(World world, BlockPos pos){
+        TileEntity tile = world.getTileEntity(pos);
+
+        if(tile instanceof MobSpawnerTileEntity) {
+            ((MobSpawnerTileEntity) tile).setRedstonePowered(world.isBlockPowered(pos));
+        }
     }
 
 }
