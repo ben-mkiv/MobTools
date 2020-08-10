@@ -6,8 +6,6 @@ import ben_mkiv.mobtools.energy.CustomEnergyStorage;
 import ben_mkiv.mobtools.inventory.slots.SpecialItemSlot;
 import ben_mkiv.mobtools.items.MobCollector;
 import ben_mkiv.mobtools.tileentity.MobSpawnerTileEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
@@ -25,7 +23,7 @@ public class MobSpawnerContainer extends CustomContainer {
 
     private static HashSet<Item> cartridgeSlotItems = new HashSet<>();
 
-    public MobSpawnerContainer(PlayerEntity player, PlayerInventory inventoryPlayer, MobSpawnerTileEntity tile){
+    public MobSpawnerContainer(PlayerInventory inventoryPlayer, MobSpawnerTileEntity tile){
         super(containerType, MobSpawnerBlock.GUI_ID);
 
         if(cartridgeSlotItems.isEmpty()){
@@ -44,8 +42,8 @@ public class MobSpawnerContainer extends CustomContainer {
     }
 
     public static MobSpawnerContainer createContainerClientSide(int windowID, PlayerInventory playerInventory, net.minecraft.network.PacketBuffer extraData){
-        MobSpawnerTileEntity tile = (MobSpawnerTileEntity) Minecraft.getInstance().player.getEntityWorld().getTileEntity(extraData.readBlockPos());
-        return new MobSpawnerContainer(Minecraft.getInstance().player, playerInventory, tile);
+        MobSpawnerTileEntity tile = (MobSpawnerTileEntity) playerInventory.player.getEntityWorld().getTileEntity(extraData.readBlockPos());
+        return new MobSpawnerContainer(playerInventory, tile);
     }
 
 

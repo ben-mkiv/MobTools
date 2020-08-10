@@ -248,7 +248,7 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
     @Override
     @Nullable
     public Container createMenu(int p_createMenu_1_, PlayerInventory playerInventory, PlayerEntity playerEntity){
-        return new MobSpawnerContainer(playerEntity, playerInventory, this);
+        return new MobSpawnerContainer(playerInventory, this);
     }
 
 }

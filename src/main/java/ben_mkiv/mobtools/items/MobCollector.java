@@ -240,7 +240,7 @@ public class MobCollector extends Item implements INamedContainerProvider {
     @Override
     @Nullable
     public Container createMenu(int p_createMenu_1_, PlayerInventory playerInventory, PlayerEntity playerEntity){
-        return new MobCollectorContainer(playerEntity, playerInventory, playerEntity.getHeldItemMainhand());
+        return new MobCollectorContainer(playerInventory, playerEntity.getHeldItemMainhand());
     }
 
 }

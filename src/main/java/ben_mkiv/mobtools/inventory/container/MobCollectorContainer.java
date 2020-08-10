@@ -3,14 +3,11 @@ package ben_mkiv.mobtools.inventory.container;
 import ben_mkiv.mobtools.inventory.MobCollectorItemInventory;
 import ben_mkiv.mobtools.inventory.slots.SpecialItemSlot;
 import ben_mkiv.mobtools.items.MobCollector;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 import java.util.HashSet;
 
@@ -27,13 +24,12 @@ public class MobCollectorContainer extends CustomContainer {
     public IItemHandler inventory;
 
 
-    public MobCollectorContainer(PlayerEntity player, PlayerInventory inventoryPlayer, ItemStack mobCollectorStack){
+    public MobCollectorContainer(PlayerInventory inventoryPlayer, ItemStack mobCollectorStack){
         super(containerType, MobCollector.GUI_ID);
 
         if(cartridgeSlotItems.isEmpty()){
             cartridgeSlotItems.add(MobCollector.DEFAULT);
         }
-
 
         itemStack = mobCollectorStack;
 
@@ -48,7 +44,7 @@ public class MobCollectorContainer extends CustomContainer {
 
     public static MobCollectorContainer createContainerClientSide(int windowID, PlayerInventory playerInventory, net.minecraft.network.PacketBuffer extraData){
         ItemStack stack = extraData.readItemStack();
-        return new MobCollectorContainer(Minecraft.getInstance().player, playerInventory, stack);
+        return new MobCollectorContainer(playerInventory, stack);
     }
 
 
