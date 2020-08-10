@@ -158,12 +158,12 @@ public class MobSpawnerTileEntity extends TileEntity implements ITickableTileEnt
             if(!(mob instanceof MobEntity))
                 continue;
 
-            if(!((MobEntity) mob).canSpawn(getWorld(), SpawnReason.SPAWN_EGG))
-                continue;
-
             Vector3d spawnPosition = Vector3d.copy(getPos()).subtract(radius, 0, radius).add(getWorld().rand.nextFloat() * 2 * radius, 1, getWorld().rand.nextFloat() * 2 * radius);
 
             mob.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
+
+            if(!((MobEntity) mob).canSpawn(getWorld(), SpawnReason.SPAWN_EGG))
+                continue;
 
             if(!getWorld().hasNoCollisions(mob))
                 continue;
