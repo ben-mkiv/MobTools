@@ -1,23 +1,27 @@
 package ben_mkiv.mobtools.client.gui;
 
+import ben_mkiv.mobtools.MobTools;
 import ben_mkiv.mobtools.inventory.container.MobCollectorContainer;
 import ben_mkiv.mobtools.items.MobCartridge;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 public class MobCollectorContainerScreen extends CustomContainerScreen<MobCollectorContainer> {
+    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(MobTools.MOD_ID, "textures/gui/mobcollector_inventory.png");
+
     public MobCollectorContainerScreen(MobCollectorContainer containerBasic, PlayerInventory playerInventory, ITextComponent title){
         super(containerBasic, playerInventory, title, MobCollectorContainer.width, MobCollectorContainer.height);
     }
 
     protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-        super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+        super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY, BACKGROUND_TEXTURE);
 
         String text = "no cartridge";
         ItemStack cartridge = container.inventory.getStackInSlot(0);

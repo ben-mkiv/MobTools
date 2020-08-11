@@ -11,6 +11,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -21,8 +22,9 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerContainer> {
-    Slider rangeSlider;
+public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerContainer> implements IContainerCallback {
+    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(MobTools.MOD_ID, "textures/gui/mobspawner_inventory.png");
+    private Slider rangeSlider, delaySlider;
 
     class IgnorantHandler implements Button.IPressable {
         @Override
@@ -30,18 +32,27 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
     };
 
     class SliderHandler implements Slider.ISlider {
+        String command;
+
+        public SliderHandler(String command){
+            super();
+            this.command = command;
+        }
+
         @Override
         public void onChangeSliderValue(Slider slider) {
             CompoundNBT data = new CompoundNBT();
-            data.putInt("setRadius", slider.getValueInt());
+            data.putInt(this.command, slider.getValueInt());
             NetworkPacketBase.sendToServer(new MobSpawner_NetworkMessage(container.spawner, data));
         }
     };
 
-    SliderHandler rangeSliderHandler = new SliderHandler();
+    private SliderHandler rangeSliderHandler = new SliderHandler("setRadius");
+    private SliderHandler delaySliderHandler = new SliderHandler("setDelay");
 
     public MobSpawnerContainerScreen(MobSpawnerContainer containerBasic, PlayerInventory playerInventory, ITextComponent title){
         super(containerBasic, playerInventory, title, MobSpawnerContainer.width, MobSpawnerContainer.height);
+        container.callback = this;
     }
 
     @Override
@@ -49,14 +60,18 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
         super.init(minecraft, width, height);
         buttons.clear();
 
-        rangeSlider = new Slider(getGuiLeft() + 5, getGuiTop() + 90, 110, 16, new StringTextComponent("radius: "), new StringTextComponent(" blocks"), 0, container.spawner.getMaxRadius(), container.spawner.radius, false, true, new IgnorantHandler(), rangeSliderHandler);
+        rangeSlider = new Slider(getGuiLeft() + 5, getGuiTop() + 86, 110, 16, new StringTextComponent("radius: "), new StringTextComponent(" blocks"), 0, container.spawner.getMaxRadius(), container.spawner.radius, false, true, new IgnorantHandler(), rangeSliderHandler);
+        delaySlider = new Slider(getGuiLeft() + 5, getGuiTop() + 66, 110, 16, new StringTextComponent("delay: "), new StringTextComponent(" ticks"), container.spawner.getMinTickDelay(), MobTools.spawnerMaxTickDelay, container.spawner.tickDelay, false, true, new IgnorantHandler(), delaySliderHandler);
 
         if(!buttons.contains(rangeSlider))
             addButton(rangeSlider);
+
+        if(!buttons.contains(delaySlider))
+            addButton(delaySlider);
     }
 
     protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-        super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+        super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY, BACKGROUND_TEXTURE);
 
         ItemStack cartridge = container.spawner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null).getStackInSlot(0);
 
@@ -95,6 +110,16 @@ public class MobSpawnerContainerScreen extends CustomContainerScreen<MobSpawnerC
         else {
             font.drawString(matrixStack, "no cartridge", getGuiLeft() + 10, getGuiTop() + 25, Color.darkGray.getRGB());
         }
+    }
 
+    public void containerCallback(){
+        rangeSlider.maxValue = container.spawner.getMaxRadius();
+        rangeSlider.setValue(container.spawner.radius);
+        rangeSlider.updateSlider();
+
+        delaySlider.minValue = container.spawner.getMinTickDelay();
+        delaySlider.setValue(container.spawner.tickDelay);
+        delaySlider.updateSlider();
     }
 }
+

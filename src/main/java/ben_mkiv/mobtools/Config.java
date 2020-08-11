@@ -23,7 +23,7 @@ public class Config {
             spawnerMaxRadius = builder
                     .comment("maximum allowed radius for the spawner")
                     .translation("config.spawnerMaxRadius")
-                    .define("spawnerMaxRadius", 5);
+                    .define("spawnerMaxRadius", 6);
 
             spawnerMinTickDelay = builder
                     .comment("minimum tick delay for mobSpawner")

@@ -8,15 +8,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 
 public class MobCollectorInventory extends ItemStackHandler {
-    MobSpawnerTileEntity tile;
 
     public MobCollectorInventory(int size){
         super(size);
-    }
-
-    public MobCollectorInventory(int size, MobSpawnerTileEntity spawner){
-        this(size);
-        tile = spawner;
     }
 
     @Override
@@ -24,12 +18,5 @@ public class MobCollectorInventory extends ItemStackHandler {
         return stack.getItem() instanceof MobCartridge;
     }
 
-    @Override
-    protected void onContentsChanged(int slot) {
-        if(tile != null) {
-            tile.reloadInventory();
-        }
 
-        super.onContentsChanged(slot);
-    }
 }

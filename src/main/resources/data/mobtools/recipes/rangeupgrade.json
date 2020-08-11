@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sbs",
+    "bEb",
+    "sbs"
+  ],
+  "key": {
+    "s": {
+      "item": "minecraft:string"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "b": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "result": {
+    "item": "mobtools:rangeupgrade"
+  }
+}

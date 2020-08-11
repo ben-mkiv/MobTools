@@ -5,9 +5,7 @@ import ben_mkiv.mobtools.inventory.container.MobCollectorContainer;
 import ben_mkiv.mobtools.client.gui.MobCollectorContainerScreen;
 import ben_mkiv.mobtools.inventory.container.MobSpawnerContainer;
 import ben_mkiv.mobtools.client.gui.MobSpawnerContainerScreen;
-import ben_mkiv.mobtools.items.MobCartridge;
-import ben_mkiv.mobtools.items.MobCollector;
-import ben_mkiv.mobtools.items.MobSpawnerItem;
+import ben_mkiv.mobtools.items.*;
 import ben_mkiv.mobtools.network.NetworkPacketBase;
 import ben_mkiv.mobtools.tileentity.MobSpawnerTileEntity;
 import net.minecraft.block.Block;
@@ -50,6 +48,7 @@ public class MobTools {
     public static int entityCountLimit = 10;
     public static int spawnerMaxRadius = 5;
     public static int spawnerMinTickDelay = 50;
+    public static int spawnerMaxTickDelay = 200;
     public static boolean badPlacementPenalty = true;
 
     public static final ItemGroup CREATIVE_TAB = new ItemGroup(MOD_ID+".creativeTab") {
@@ -84,6 +83,8 @@ public class MobTools {
             event.getRegistry().register(MobCollector.DEFAULT = new MobCollector());
             event.getRegistry().register(MobCartridge.DEFAULT = new MobCartridge());
             event.getRegistry().register(MobSpawnerItem.DEFAULT = new MobSpawnerItem());
+            event.getRegistry().register(UpgradeSpeedItem.DEFAULT = new UpgradeSpeedItem());
+            event.getRegistry().register(UpgradeRangeItem.DEFAULT = new UpgradeRangeItem());
         }
 
         @SubscribeEvent
